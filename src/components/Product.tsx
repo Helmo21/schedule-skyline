@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 
 const Product = () => {
   return (
-    <section className="py-20 px-4 bg-gray-50">
+    <section className="py-20 px-4 bg-black">
       <div className="max-w-4xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -15,7 +15,7 @@ const Product = () => {
           <span className="px-3 py-1 text-sm font-medium bg-primary/10 text-primary rounded-full">
             Services
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-primary-dark mt-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-primary mt-4">
             What We Offer
           </h2>
         </motion.div>
@@ -41,17 +41,17 @@ const Product = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: index * 0.2 }}
-              className="p-6 rounded-xl bg-white shadow-lg hover:shadow-xl transition-shadow duration-300"
+              className="p-6 rounded-xl bg-black border border-primary/20 shadow-lg hover:shadow-xl transition-shadow duration-300"
             >
-              <h3 className="text-xl font-semibold text-primary-dark mb-2">
+              <h3 className="text-xl font-semibold text-primary mb-2">
                 {service.title}
               </h3>
-              <p className="text-gray-600 mb-4">{service.description}</p>
+              <p className="text-primary-light mb-4">{service.description}</p>
               <div className="flex justify-between items-center">
                 <span className="text-2xl font-bold text-primary">
                   {service.price}
                 </span>
-                <span className="text-sm text-gray-500">{service.duration}</span>
+                <span className="text-sm text-primary-light">{service.duration}</span>
               </div>
             </motion.div>
           ))}

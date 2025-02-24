@@ -19,7 +19,7 @@ const Booking = () => {
   };
 
   return (
-    <section id="booking" className="py-20 px-4">
+    <section id="booking" className="py-20 px-4 bg-black">
       <div className="max-w-4xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -31,7 +31,7 @@ const Booking = () => {
           <span className="px-3 py-1 text-sm font-medium bg-primary/10 text-primary rounded-full">
             Schedule
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-primary-dark mt-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-primary mt-4">
             Book Your Session
           </h2>
         </motion.div>
@@ -42,13 +42,13 @@ const Booking = () => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="bg-white p-6 rounded-xl shadow-lg"
+            className="bg-black border border-primary/20 p-6 rounded-xl shadow-lg"
           >
             <Calendar
               mode="single"
               selected={date}
               onSelect={setDate}
-              className="rounded-md"
+              className="rounded-md text-primary"
             />
           </motion.div>
 
@@ -66,8 +66,8 @@ const Booking = () => {
                   onClick={() => setTime(t)}
                   className={`p-3 rounded-lg border transition-all duration-300 ${
                     time === t
-                      ? "border-primary bg-primary text-white"
-                      : "border-gray-200 hover:border-primary"
+                      ? "border-primary bg-primary text-black"
+                      : "border-primary/20 text-primary hover:border-primary"
                   }`}
                 >
                   {t}
@@ -81,7 +81,7 @@ const Booking = () => {
                 placeholder="Your Name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full p-3 rounded-lg border border-gray-200 focus:border-primary outline-none transition-all duration-300"
+                className="w-full p-3 rounded-lg bg-black border border-primary/20 text-primary placeholder-primary/50 focus:border-primary outline-none transition-all duration-300"
                 required
               />
               <input
@@ -89,12 +89,12 @@ const Booking = () => {
                 placeholder="Your Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full p-3 rounded-lg border border-gray-200 focus:border-primary outline-none transition-all duration-300"
+                className="w-full p-3 rounded-lg bg-black border border-primary/20 text-primary placeholder-primary/50 focus:border-primary outline-none transition-all duration-300"
                 required
               />
               <button
                 type="submit"
-                className="w-full bg-primary text-white px-6 py-3 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-primary text-black px-6 py-3 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={!date || !time || !name || !email}
               >
                 Confirm Booking
