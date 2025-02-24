@@ -9,13 +9,44 @@ const Booking = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
 
-  const availableTimes = ["09:00", "11:00", "14:00", "16:00"];
+  // Updated to 30-minute slots
+  const availableTimes = [
+    "09:00", "09:30", 
+    "10:00", "10:30", 
+    "11:00", "11:30",
+    "14:00", "14:30", 
+    "15:00", "15:30"
+  ];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle booking submission
-    console.log({ date, time, name, email });
-    alert("Booking submitted successfully!");
+    
+    if (!date || !time || !name || !email) return;
+
+    // Format the event time
+    const eventDate = new Date(date);
+    const [hours, minutes] = time.split(':');
+    eventDate.setHours(parseInt(hours), parseInt(minutes));
+    const endTime = new Date(eventDate.getTime() + 30 * 60000); // Add 30 minutes
+
+    // Create Google Calendar event URL
+    const event = {
+      text: `Consultation with ${name}`,
+      dates: `${eventDate.toISOString()}/${endTime.toISOString()}`,
+      details: `Meeting with ${name} (${email})`,
+      location: "Online Meeting"
+    };
+
+    const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
+      event.text
+    )}&dates=${encodeURIComponent(
+      event.dates.replace(/[-:]/g, "").replace(/\.\d{3}/g, "")
+    )}&details=${encodeURIComponent(event.details)}&location=${encodeURIComponent(
+      event.location
+    )}`;
+
+    // Open Google Calendar in a new window
+    window.open(googleCalendarUrl, "_blank");
   };
 
   return (
@@ -34,6 +65,7 @@ const Booking = () => {
           <h2 className="text-3xl md:text-4xl font-bold text-primary mt-4">
             Book Your Session
           </h2>
+          <p className="text-primary-light mt-2">30-minute consultation sessions</p>
         </motion.div>
 
         <div className="grid md:grid-cols-2 gap-8">
@@ -49,6 +81,16 @@ const Booking = () => {
               selected={date}
               onSelect={setDate}
               className="rounded-md text-primary"
+              disabled={(date) => {
+                // Disable past dates and weekends
+                const now = new Date();
+                now.setHours(0, 0, 0, 0);
+                return (
+                  date < now ||
+                  date.getDay() === 0 ||
+                  date.getDay() === 6
+                );
+              }}
             />
           </motion.div>
 
@@ -97,7 +139,7 @@ const Booking = () => {
                 className="w-full bg-primary text-black px-6 py-3 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={!date || !time || !name || !email}
               >
-                Confirm Booking
+                Add to Google Calendar
               </button>
             </form>
           </motion.div>
