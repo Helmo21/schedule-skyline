@@ -3,11 +3,17 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Calendar } from "@/components/ui/calendar";
 
+interface BookedSlot {
+  date: string;
+  time: string;
+}
+
 const Booking = () => {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState<string | undefined>(undefined);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [bookedSlots, setBookedSlots] = useState<BookedSlot[]>([]);
 
   // Updated to 30-minute slots
   const availableTimes = [
@@ -45,8 +51,28 @@ const Booking = () => {
       event.location
     )}`;
 
+    // Add the slot to booked slots
+    setBookedSlots(prev => [...prev, {
+      date: date.toISOString().split('T')[0],
+      time: time
+    }]);
+
+    // Reset form
+    setDate(undefined);
+    setTime(undefined);
+    setName("");
+    setEmail("");
+
     // Open Google Calendar in a new window
     window.open(googleCalendarUrl, "_blank");
+  };
+
+  const isTimeSlotBooked = (time: string) => {
+    if (!date) return false;
+    const dateStr = date.toISOString().split('T')[0];
+    return bookedSlots.some(slot => 
+      slot.date === dateStr && slot.time === time
+    );
   };
 
   return (
@@ -79,7 +105,10 @@ const Booking = () => {
             <Calendar
               mode="single"
               selected={date}
-              onSelect={setDate}
+              onSelect={(newDate) => {
+                setDate(newDate);
+                setTime(undefined); // Reset time when date changes
+              }}
               className="rounded-md text-primary"
               disabled={(date) => {
                 // Disable past dates and weekends
@@ -102,19 +131,26 @@ const Booking = () => {
             className="space-y-6"
           >
             <div className="grid grid-cols-2 gap-4">
-              {availableTimes.map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setTime(t)}
-                  className={`p-3 rounded-lg border transition-all duration-300 ${
-                    time === t
-                      ? "border-primary bg-primary text-black"
-                      : "border-primary/20 text-primary hover:border-primary"
-                  }`}
-                >
-                  {t}
-                </button>
-              ))}
+              {availableTimes.map((t) => {
+                const isBooked = isTimeSlotBooked(t);
+                return (
+                  <button
+                    key={t}
+                    onClick={() => !isBooked && setTime(t)}
+                    className={`p-3 rounded-lg border transition-all duration-300 ${
+                      isBooked 
+                        ? "border-primary/10 text-primary/30 cursor-not-allowed"
+                        : time === t
+                        ? "border-primary bg-primary text-black"
+                        : "border-primary/20 text-primary hover:border-primary"
+                    }`}
+                    disabled={isBooked}
+                  >
+                    {t}
+                    {isBooked && <span className="block text-xs">(Booked)</span>}
+                  </button>
+                );
+              })}
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
