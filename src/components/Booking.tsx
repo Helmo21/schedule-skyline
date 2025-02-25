@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Calendar } from "@/components/ui/calendar";
 
@@ -7,6 +7,8 @@ interface BookedSlot {
   date: string;
   time: string;
 }
+
+const CALENDAR_ID = 'trustaiagency@gmail.com';
 
 const Booking = () => {
   const [date, setDate] = useState<Date | undefined>(undefined);
@@ -24,6 +26,59 @@ const Booking = () => {
     "15:00", "15:30"
   ];
 
+  useEffect(() => {
+    if (date) {
+      fetchBusySlots(date);
+    }
+  }, [date]);
+
+  const fetchBusySlots = async (selectedDate: Date) => {
+    try {
+      // Format the date to get the full day's range
+      const startDate = new Date(selectedDate);
+      startDate.setHours(0, 0, 0, 0);
+      const endDate = new Date(selectedDate);
+      endDate.setHours(23, 59, 59, 999);
+
+      // Fetch busy slots from public Google Calendar
+      const response = await fetch(
+        `https://www.googleapis.com/calendar/v3/freeBusy?key=YOUR_API_KEY`, // You'll need a public API key
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            timeMin: startDate.toISOString(),
+            timeMax: endDate.toISOString(),
+            items: [{ id: CALENDAR_ID }]
+          })
+        }
+      );
+
+      const data = await response.json();
+      
+      if (data.calendars && data.calendars[CALENDAR_ID]) {
+        const busySlots = data.calendars[CALENDAR_ID].busy;
+        const bookedTimeSlots: BookedSlot[] = [];
+
+        busySlots.forEach((slot: { start: string; end: string }) => {
+          const startTime = new Date(slot.start);
+          const timeStr = `${String(startTime.getHours()).padStart(2, '0')}:${String(startTime.getMinutes()).padStart(2, '0')}`;
+          
+          bookedTimeSlots.push({
+            date: startTime.toISOString().split('T')[0],
+            time: timeStr
+          });
+        });
+
+        setBookedSlots(bookedTimeSlots);
+      }
+    } catch (error) {
+      console.error('Error fetching busy slots:', error);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -35,12 +90,13 @@ const Booking = () => {
     eventDate.setHours(parseInt(hours), parseInt(minutes));
     const endTime = new Date(eventDate.getTime() + 30 * 60000); // Add 30 minutes
 
-    // Create Google Calendar event URL
+    // Create Google Calendar event URL with your calendar ID
     const event = {
       text: `Consultation with ${name}`,
       dates: `${eventDate.toISOString()}/${endTime.toISOString()}`,
       details: `Meeting with ${name} (${email})`,
-      location: "Online Meeting"
+      location: "Online Meeting",
+      src: CALENDAR_ID // This will add the event directly to your calendar
     };
 
     const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
@@ -49,7 +105,7 @@ const Booking = () => {
       event.dates.replace(/[-:]/g, "").replace(/\.\d{3}/g, "")
     )}&details=${encodeURIComponent(event.details)}&location=${encodeURIComponent(
       event.location
-    )}`;
+    )}&src=${encodeURIComponent(event.src)}`;
 
     // Add the slot to booked slots
     setBookedSlots(prev => [...prev, {
